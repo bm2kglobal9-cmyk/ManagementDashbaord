@@ -1,0 +1,29 @@
+<?php
+/* Call Center Dashboard */
+sample_notice('call-center.php');
+
+kpis([
+    ['label' => 'Calls received',      'value' => '3,946', 'note' => 'This month'],
+    ['label' => 'Answer rate',         'value' => '91.4%', 'note' => '+2.3 pts vs last month', 'trend' => 'up'],
+    ['label' => 'Avg handling time',   'value' => '4m 38s'],
+    ['label' => 'Missed calls',        'value' => '339',   'note' => '+18 vs last month', 'trend' => 'down'],
+]);
+
+echo '<div class="grid-2">';
+chart_panel('ccHour', 'Calls by hour of day', 'bar',
+    ['8am', '9am', '10am', '11am', '12pm', '1pm', '2pm', '3pm', '4pm', '5pm'],
+    [['label' => 'Calls', 'data' => [210, 486, 512, 468, 390, 402, 455, 428, 371, 224]]]);
+chart_panel('ccReason', 'Calls by reason', 'doughnut',
+    ['Leasing inquiry', 'Maintenance', 'Payments', 'Move-out', 'Other'],
+    [['label' => 'Calls', 'data' => [1520, 1105, 702, 318, 301]]]);
+echo '</div>';
+
+table_panel('Agent performance',
+    ['Agent', 'Calls handled', 'Avg handling time', 'Tours booked'],
+    [
+        ['Agent 1', '612', '4m 12s', '48'],
+        ['Agent 2', '588', '4m 51s', '41'],
+        ['Agent 3', '540', '5m 03s', '36'],
+        ['Agent 4', '497', '4m 22s', '39'],
+    ]);
+
