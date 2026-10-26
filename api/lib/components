@@ -1,0 +1,72 @@
+<?php
+/*
+ * Reusable building blocks for dashboard pages.
+ *
+ *   kpis([...])                       → row of number cards
+ *   chart_panel(id, title, type, labels, datasets)
+ *                                     → Chart.js chart (bar, line, doughnut, pie)
+ *   table_panel(title, headers, rows) → simple table
+ *   sample_notice('file.php')         → yellow "sample data" note
+ */
+
+function sample_notice($file) {
+    echo '<div class="notice">Showing sample data. Replace it with real data in <code>api/_dashboards/' . e($file) . '</code>.</div>';
+}
+
+/* $items: [ ['label'=>'..', 'value'=>'..', 'note'=>'..', 'trend'=>'up'|'down'|''], ... ] */
+function kpis(array $items) {
+    echo '<div class="kpis">';
+    foreach ($items as $k) {
+        $trend = isset($k['trend']) ? ' ' . e($k['trend']) : '';
+        echo '<div class="kpi">'
+           . '<div class="label">' . e($k['label']) . '</div>'
+           . '<div class="value">' . e($k['value']) . '</div>'
+           . (isset($k['note']) ? '<div class="note' . $trend . '">' . e($k['note']) . '</div>' : '')
+           . '</div>';
+    }
+    echo '</div>';
+}
+
+/* $datasets: [ ['label'=>'..', 'data'=>[1,2,3]], ... ] */
+function chart_panel($id, $title, $type, array $labels, array $datasets, $wrap = true) {
+    $palette = ['#4f7a63', '#c08a3e', '#3f6e8c', '#a3392f', '#7a6aa6', '#8a9a5b', '#5f6b69'];
+    $round = in_array($type, ['doughnut', 'pie'], true);
+    foreach ($datasets as $i => &$ds) {
+        if ($round) {
+            $ds['backgroundColor'] = array_slice(array_merge($palette, $palette), 0, count($labels));
+        } else {
+            $ds['backgroundColor'] = $palette[$i % count($palette)];
+            $ds['borderColor']     = $palette[$i % count($palette)];
+            if ($type === 'line') { $ds['tension'] = 0.3; $ds['fill'] = false; }
+        }
+    }
+    unset($ds);
+
+    $config = [
+        'type' => $type,
+        'data' => ['labels' => $labels, 'datasets' => $datasets],
+        'options' => [
+            'responsive' => true,
+            'maintainAspectRatio' => false,
+            'plugins' => ['legend' => ['display' => $round || count($datasets) > 1, 'position' => 'bottom']],
+        ],
+    ];
+    $safeId = preg_replace('/[^a-zA-Z0-9_-]/', '', $id);
+
+    echo '<section class="panel"><h3>' . e($title) . '</h3>'
+       . '<div class="chart-box"><canvas id="' . $safeId . '"></canvas></div></section>'
+       . '<script>new Chart(document.getElementById("' . $safeId . '"), '
+       . json_encode($config, JSON_HEX_TAG | JSON_HEX_AMP) . ');</script>';
+}
+
+function table_panel($title, array $headers, array $rows) {
+    echo '<section class="panel"><h3>' . e($title) . '</h3><div class="table-scroll"><table><thead><tr>';
+    foreach ($headers as $h) echo '<th>' . e($h) . '</th>';
+    echo '</tr></thead><tbody>';
+    foreach ($rows as $r) {
+        echo '<tr>';
+        foreach ($r as $cell) echo '<td>' . e($cell) . '</td>';
+        echo '</tr>';
+    }
+    echo '</tbody></table></div></section>';
+}
