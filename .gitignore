@@ -1,0 +1,16 @@
+# Vercel
+.vercel
+
+# Secrets – never commit API keys
+.env
+.env.*
+
+# OS / editor files
+.DS_Store
+Thumbs.db
+.idea/
+.vscode/
+
+# Dependencies
+vendor/
+node_modules/
